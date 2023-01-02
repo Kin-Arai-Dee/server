@@ -3,6 +3,7 @@ from decouple import config
 
 client = MongoClient(config('MONGO_URL'))
 
-userDb = client.LightingPole.User
-poleDb = client.LightingPole.Pole
-pmDb = client.LightingPole.PmStatus
+userDb = client.KinAriDee.User
+foodDb = client.KinAriDee.Food
+foodFreqDb = client.KinAriDee.FoodFrequency
+foodHistoryDb = client.KinAriDee.FoodHistory
