@@ -61,12 +61,16 @@ def toggle_favorite_food(food_freq: FoodFrequency):
       'updateAt': datetime.now()},
   })
 
-def toggle_not_show(food_freq: FoodFrequency,):
+def toggle_not_show(food_freq: FoodFrequency):
   foodFreqDb.update_one({'_id':food_freq.id},{
     '$set': { 
       'isNeverShow':  not food_freq.isNeverShow,
       'updateAt': datetime.now()},
   })
+
+  return {
+    "detail": f"set food never show to be {not food_freq.isNeverShow}"
+  }
 
 def ban_food_by_id(user_id:str,food_id_list: List[str]):
   food_freq_id_list = [create_or_find_food_frequency_db(user_id,food_id).id for food_id in food_id_list]
@@ -96,3 +100,7 @@ def get_all_ban_food_id(user_id: str):
   })
 
   return [food["foodId"] for food in ban_food]
+
+def set_not_show(user_id: str,food_id: str):
+  foodFreq = create_or_find_food_frequency_db(user_id,food_id)
+  return toggle_not_show(foodFreq)

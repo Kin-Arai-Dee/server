@@ -5,7 +5,7 @@ from models.utils import PyObjectId
 from models.food import BaseFood, Food
 from bson import ObjectId
 
-class TopFoodResponse(BaseModel):
+class ListFoodResponse(BaseModel):
 	data: List[Food] = Field(default_factory=list)
 	
 	class Config:

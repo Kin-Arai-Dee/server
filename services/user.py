@@ -36,12 +36,10 @@ def authenticate_user(username: str, password: str):
 			return False
 	return user
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def verify_user(request: Request,token: str = Depends(oauth2_scheme)):
 	token_data = await verify_access_token(token)
-	user = get_user(token_data.id)
-	if user is None:
-			raise USER_NOT_FOUND_ERROR
-	return user
+	request.state.user = token_data
+	return token_data
 
 async def get_current_user(request: Request,token: str = Depends(oauth2_scheme)):
 	token_data = await verify_access_token(token)
@@ -55,11 +53,6 @@ async def checkUser(request: Request,user_id:str):
 	if str(request.state.user.id) != user_id:
 		raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail='invalid user id')
 	return user_id
-
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
-	if current_user.disabled:
-		raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
-	return current_user
 
 async def get_token_response(user):
 	access_token, expire_token = create_access_token(
@@ -106,8 +99,8 @@ async def update_user_description(user_id: str,updateData: UpdateUserRequest,fir
 		'$set': updateDescritpion.dict()
 	})
 
-	if updateDescritpion.banfood:
-		ban_food_by_ingredient(user_id,updateDescritpion.banfood)
+	if updateDescritpion.banFood:
+		ban_food_by_ingredient(user_id,updateDescritpion.banFood)
 	
 	if first_time:
 		create_new_foods_frequency_db(user_id,updateData.lastMenu, {'frequency': 1, 'successCount': 1})

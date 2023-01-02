@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes.food import food
 from routes.user import user
 from routes.prediction import prediction
-from services.user import get_current_user
+from services.user import get_current_user, verify_user
 
 def create_app():
     app = FastAPI(
@@ -26,7 +26,7 @@ def create_app():
     return app
 
 app = create_app()
-require_authorize = Depends(get_current_user)
+require_authorize = Depends(verify_user)
 
 @app.on_event("shutdown")
 def shutdown_event():
@@ -41,4 +41,4 @@ async def check_app():
     return {"message": "API is running."}
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8080, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)

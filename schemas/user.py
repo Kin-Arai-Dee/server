@@ -67,7 +67,7 @@ class UpdateUserDescription(BaseModel):
 	age: int = Field(default_factory=None)
 	weight: float = Field(...)
 	height: float = Field(...)
-	banfood: List[str] = Field(default_factory=list)
+	banFood: List[str] = Field(default_factory=list)
 
 class UpdateUserRequest(UpdateUserDescription):
 	lastMenu: List[str]

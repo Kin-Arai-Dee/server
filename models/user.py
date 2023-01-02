@@ -21,7 +21,7 @@ class BaseUser(MongoBaseModel):
 	age: Optional[int] = Field(...)
 	weight: Optional[float] = Field(...)
 	height: Optional[float] = Field(...)
-	banfood: Optional[List[str]] = Field(default_factory=list)
+	banFood: Optional[List[str]] = Field(default_factory=list)
 
 class User(BaseUser):
 	id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
