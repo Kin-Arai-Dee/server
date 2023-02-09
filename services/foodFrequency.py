@@ -104,3 +104,26 @@ def get_all_ban_food_id(user_id: str):
 def set_not_show(user_id: str,food_id: str):
   foodFreq = create_or_find_food_frequency_db(user_id,food_id)
   return toggle_not_show(foodFreq)
+
+def set_food_interact(user_id:str,food_id: str, interact: int):
+  food_freq = create_or_find_food_frequency_db(user_id,food_id)
+
+  foodFreqDb.update_one({"_id": food_freq.id}, {
+    "$set": {
+      "interact": interact
+    }
+  })
+
+  return {
+    "detail": "update success"
+  }
+
+
+def get_all_voted_food_id(user_id: str):
+  foodFreqList = foodFreqDb.find({
+    'userId': ObjectId(user_id),
+    'interact': { '$ne': 0}
+    }
+  )
+
+  return [foodFreq["foodId"] for foodFreq in foodFreqList]

@@ -6,11 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes.food import food
 from routes.user import user
 from routes.prediction import prediction
-from services.user import get_current_user, verify_user
+from services.user import verify_user
+
+COMMON_PREFIX = '/api/v1'
 
 def create_app():
     app = FastAPI(
-        title="Kin Ari Dee"
+        title="Kin Ari Dee",
     )
 
     origins = ['*']
@@ -32,11 +34,11 @@ require_authorize = Depends(verify_user)
 def shutdown_event():
     client.close()
 
-app.include_router(user,tags=['user'])
-app.include_router(prediction,prefix='/prediction',tags=['prediction'], dependencies=[require_authorize])
-app.include_router(food,prefix='/food',tags=['food'], dependencies=[require_authorize])
+app.include_router(user,prefix=COMMON_PREFIX,tags=['user'])
+app.include_router(prediction,prefix=f'{COMMON_PREFIX}/prediction',tags=['prediction'], dependencies=[require_authorize])
+app.include_router(food,prefix=f'{COMMON_PREFIX}/food',tags=['food'], dependencies=[require_authorize])
 
-@app.get("/",tags=['check'])
+@app.get(COMMON_PREFIX,tags=['check'])
 async def check_app():
     return {"message": "API is running."}
 

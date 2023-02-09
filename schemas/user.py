@@ -3,7 +3,7 @@ from typing import List, NewType, Optional
 from bson import ObjectId
 from pydantic import BaseModel, EmailStr, Field, root_validator
 
-from models.user import BaseUser, Gender
+from models.user import BaseUser
 from models.utils import PyObjectId
 from services.utils import get_password_hash
 
@@ -27,7 +27,6 @@ class TokenResponse(RenewToken):
 
 class UserResponse(BaseUser):
 	userId: PyObjectId
-	withDescription: bool
 
 	@root_validator(pre=True)
 	def remove_id(cls,values):
@@ -35,7 +34,6 @@ class UserResponse(BaseUser):
 			values["userId"] = values.pop('id')
 		elif('_id' in values):
 			values["userId"] = values.pop('_id')
-		values["withDescription"] = bool(values["gender"])
 
 		return values
 
@@ -70,5 +68,4 @@ class UpdateUserDescription(BaseModel):
 	banFood: List[str] = Field(default_factory=list)
 
 class UpdateUserRequest(UpdateUserDescription):
-	lastMenu: List[str]
 	isFirstTime: bool = Field(default=False)

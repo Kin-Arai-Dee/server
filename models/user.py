@@ -2,9 +2,6 @@ from typing import List, NewType, Optional
 from pydantic import BaseModel, EmailStr, Field
 from .utils import MongoBaseModel, PyObjectId
 from enum import Enum
-class Gender(Enum):
-	MALE = 'male'
-	FEMALE = 'female'
 
 class Token(BaseModel):
 	accessToken: str
@@ -17,10 +14,11 @@ class TokenData(BaseModel):
 class BaseUser(MongoBaseModel):
 	username: str = Field(...)
 	email: EmailStr = Field(...)
-	gender: Optional[NewType('Gender', Gender)] = Field(...)
-	age: Optional[int] = Field(...)
-	weight: Optional[float] = Field(...)
-	height: Optional[float] = Field(...)
+	withDescription: bool = Field(default=False)
+	gender: Optional[str] = Field(default=None)
+	age: Optional[int] = Field(default=None)
+	weight: Optional[float] = Field(default=None)
+	height: Optional[float] = Field(default=None)
 	banFood: Optional[List[str]] = Field(default_factory=list)
 
 class User(BaseUser):

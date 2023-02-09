@@ -4,11 +4,11 @@ from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer 
 from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
-from models.user import User, UserInDB 
-from schemas.user import AuthResponse, RegisterRequest, RenewToken, TokenResponse, UpdateUserDescription, UpdateUserRequest
+from models.user import UserInDB 
+from schemas.user import AuthResponse, RegisterRequest, RenewToken, TokenResponse, UpdateUserDescription, UpdateUserRequest, UserResponse
 from services.authorize import create_access_token, create_refresh_token, verify_access_token, verify_refresh_token
 from services.food import get_food_id_by_ingredient
-from services.foodFrequency import ban_food_by_id, create_new_foods_frequency_db
+from services.foodFrequency import ban_food_by_id
 from services.utils import verify_password
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -79,7 +79,7 @@ async def register_user(user: RegisterRequest):
 
 	userDb.insert_one(userData.dict(by_alias=True))
 
-	tokenResponse = await get_token_response(user.dict())
+	tokenResponse = await get_token_response(userData.dict())
 
 	return AuthResponse(user=userData, **jsonable_encoder(tokenResponse))
 
@@ -92,7 +92,7 @@ def ban_food_by_ingredient(user_id:str,  ingredients: List[str]):
 	food_id_list = get_food_id_by_ingredient(ingredients)
 	ban_food_by_id(user_id,food_id_list)
 
-async def update_user_description(user_id: str,updateData: UpdateUserRequest,first_time: bool = False) -> UpdateUserDescription:
+async def update_user_description(user_id: str,updateData: UpdateUserRequest) -> UpdateUserDescription:
 	updateDescritpion = UpdateUserDescription(**updateData.dict())
 
 	userDb.update_one({'_id': ObjectId(user_id)},{
@@ -101,8 +101,16 @@ async def update_user_description(user_id: str,updateData: UpdateUserRequest,fir
 
 	if updateDescritpion.banFood:
 		ban_food_by_ingredient(user_id,updateDescritpion.banFood)
-	
-	if first_time:
-		create_new_foods_frequency_db(user_id,updateData.lastMenu, {'frequency': 1, 'successCount': 1})
 
 	return updateDescritpion
+
+async def update_ready_user(user_id: str) -> UserResponse:
+	userDb.update_one({'_id' : ObjectId(user_id)}, {
+		'$set': {
+			'withDescription': True
+		}
+	})
+
+	user = userDb.find_one({'_id' : ObjectId(user_id)})
+
+	return UserResponse(**user)

@@ -5,12 +5,17 @@ from models.utils import PaginateModel
 from bson import ObjectId
 from datetime import datetime, timezone
 
+from schemas.food import FoodResponse
+
+class FoodHistoryItemResponse(FoodHistory):
+	food: FoodResponse = Field(...)
+
 class FoodHistoryResponse(PaginateModel):
-  foodHistory: list[FoodHistory] = Field(...)
+  data: list[FoodHistoryItemResponse] = Field(...)
 
   @root_validator(pre=True)
   def validate_has_next(cls,values):
-    values['hasNext'] = len(values["foodHistory"]) == values["limit"]
+    values['hasNext'] = len(values["data"]) == values["limit"]
 
     return values
 

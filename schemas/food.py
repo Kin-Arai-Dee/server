@@ -2,18 +2,8 @@ from typing import List
 
 from pydantic import BaseModel, Field, root_validator
 from models.utils import PyObjectId
-from models.food import BaseFood, Food
+from models.food import BaseFood
 from bson import ObjectId
-
-class ListFoodResponse(BaseModel):
-	data: List[Food] = Field(default_factory=list)
-	
-	class Config:
-		allow_population_by_field_name = True
-		arbitrary_types_allowed = True
-		json_encoders={
-				ObjectId: str,
-	}
 
 class FoodIdResponse(BaseModel):
 	foodId: PyObjectId
@@ -32,7 +22,11 @@ class FoodResponse(BaseFood, FoodIdResponse):
 
 class FoodName(FoodIdResponse):
 	foodName: str = Field(...)
-	
+	imageUrl: str = Field(...)
+	calories: int = Field(...)
+	categorie: str = Field(...)
+	cookMethod: str = Field(...)
+	interact: int = Field(...)
 
 class FoodNameResponse(BaseModel):
 	data: List[FoodName]

@@ -18,6 +18,9 @@ class PyObjectId(ObjectId):
   def __modify_schema__(cls, field_schema):
       field_schema.update(type="string")
 
+def dateToISOFormat(dt : datetime):
+    return dt.replace(tzinfo=timezone.utc).isoformat().replace('+00:00','Z')
+
 class MongoBaseModel(BaseModel):
 	createAt: Optional[datetime] = Field(default_factory=datetime.now)
 	updateAt: Optional[datetime] = Field(default_factory=datetime.now)
@@ -27,9 +30,7 @@ class MongoBaseModel(BaseModel):
 		arbitrary_types_allowed = True
 		json_encoders={
         ObjectId: str,
-        datetime: lambda dt: dt.replace(tzinfo=timezone.utc)
-              .isoformat()
-              .replace("+00:00", "Z")
+        datetime: dateToISOFormat
       }
 
 class PaginateModel(BaseModel):

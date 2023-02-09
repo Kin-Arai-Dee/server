@@ -12,6 +12,7 @@ from services.user import (
   get_user_from_user_name,
 	refresh_token,
   register_user,
+  update_ready_user,
   update_user_description,
   verify_user,
 )
@@ -48,10 +49,14 @@ async def renew_access_token(renew_token: RenewToken):
 
 @user.patch('/user/{user_id}',response_model=UserResponse)
 async def update_user(updateUserData: UpdateUserRequest,user=Depends(get_current_user),user_id=Depends(checkUser)):
-	updated_data = await update_user_description(user_id,updateUserData,first_time=updateUserData)
+	updated_data = await update_user_description(user_id,updateUserData)
 
 	return UserResponse(**{**user.dict(),**updated_data.dict()})
 
 @user.get('/user/history/{user_id}', response_model=FoodHistoryResponse)
-async def get_user_prediction_food_history(start: int = 0,limit=30,_=Depends(verify_user),user_id=Depends(checkUser)):
+async def get_user_prediction_food_history(start: int = 0,limit: int =30,_=Depends(verify_user),user_id=Depends(checkUser)):
 	return find_log_food_history(user_id,start,limit)
+
+@user.patch('/user/ready/{user_id}',response_model=UserResponse)
+async def set_user_to_ready_to_use(_=Depends(verify_user),user_id=Depends(checkUser)):
+	return await update_ready_user(user_id)

@@ -1,3 +1,4 @@
+from code import interact
 from pydantic import Field
 from models.utils import MongoBaseModel, PyObjectId
 
@@ -12,3 +13,4 @@ class FoodFrequency(MongoBaseModel):
 	isNeverShow: bool = Field(default=False)
 	foodId: PyObjectId = Field(...)
 	userId: PyObjectId = Field(...)
+	interact: int = Field(default=0)

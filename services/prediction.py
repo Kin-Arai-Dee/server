@@ -1,7 +1,6 @@
 from config.db import foodDb
-from models.food import Food
-from models.foodFrequency import FoodFrequency
-from schemas.food import FoodResponse
+from schemas.prediction import ListFoodResponse
+
 from services.foodFrequency import add_frequency, create_or_find_food_frequency_db, get_all_ban_food_id
 from services.foodHistory import add_log_food_history
 
@@ -11,10 +10,10 @@ async def prediction_food(user_id: str):
 
   food = foodDb.aggregate([
     {'$match': { '_id': { '$nin': ban_id_list}}},
-    {'$sample': {'size': 1}}
+    {'$sample': {'size': 3}}
   ])
   
-  return FoodResponse(**list(food)[0])
+  return ListFoodResponse(data=list(food))
 
 async def submit_prediction_result(userId: str,foodId: str, impress: bool):
   food_freq = create_or_find_food_frequency_db(userId,foodId)

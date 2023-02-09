@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Request
-from schemas.food import FoodResponse
-from schemas.prediction import PredictionSubmitRequest
+from schemas.prediction import PredictionSubmitRequest, ListFoodResponse
 
 from services.prediction import prediction_food, submit_prediction_result
 
 prediction = APIRouter()
 
-@prediction.get('/food', response_model=FoodResponse)
+@prediction.get('/food', response_model=ListFoodResponse)
 async def perdiction_food_from_model(request: Request):
   return await prediction_food(request.state.user.id)
 
