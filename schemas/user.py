@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import List, NewType, Optional
 from bson import ObjectId
 from pydantic import BaseModel, EmailStr, Field, root_validator
+from models.food import Ingredient
 
 from models.user import BaseUser
 from models.utils import PyObjectId
@@ -27,6 +28,7 @@ class TokenResponse(RenewToken):
 
 class UserResponse(BaseUser):
 	userId: PyObjectId
+	banFood: List[Ingredient] = Field(default_factory=list)
 
 	@root_validator(pre=True)
 	def remove_id(cls,values):

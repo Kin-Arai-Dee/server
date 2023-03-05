@@ -1,7 +1,7 @@
+from datetime import datetime
 from typing import List, NewType, Optional
 from pydantic import BaseModel, EmailStr, Field
 from .utils import MongoBaseModel, PyObjectId
-from enum import Enum
 
 class Token(BaseModel):
 	accessToken: str
@@ -19,7 +19,7 @@ class BaseUser(MongoBaseModel):
 	age: Optional[int] = Field(default=None)
 	weight: Optional[float] = Field(default=None)
 	height: Optional[float] = Field(default=None)
-	banFood: Optional[List[str]] = Field(default_factory=list)
+	banFood: Optional[List[PyObjectId]] = Field(default_factory=list)
 
 class User(BaseUser):
 	id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")

@@ -6,7 +6,8 @@ from schemas.user import AuthResponse, RegisterRequest, RenewToken, TokenRespons
 from services.foodHistory import find_log_food_history
 from services.user import (
   authenticate_user,
-  checkUser, 
+  checkUser,
+  find_ban_ingredients_name, 
   get_current_user, 
   accessToken_for_login,
   get_user_from_user_name,
@@ -32,7 +33,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 @user.get("/user/me", response_model=UserResponse)
 async def read_users_data(current_user: UserInDB = Depends(get_current_user)):
-  return UserResponse(**current_user.dict())
+  return current_user
 
 @user.post('/register', response_model=AuthResponse)
 async def register_new_user(user: RegisterRequest):
@@ -51,7 +52,12 @@ async def renew_access_token(renew_token: RenewToken):
 async def update_user(updateUserData: UpdateUserRequest,user=Depends(get_current_user),user_id=Depends(checkUser)):
 	updated_data = await update_user_description(user_id,updateUserData)
 
-	return UserResponse(**{**user.dict(),**updated_data.dict()})
+	merge_user = {**user.dict(),**updated_data.dict()}
+
+	banFood = find_ban_ingredients_name(merge_user.pop('banFood'))
+
+	return UserResponse(**merge_user,banFood=banFood)
+
 
 @user.get('/user/history/{user_id}', response_model=FoodHistoryResponse)
 async def get_user_prediction_food_history(start: int = 0,limit: int =30,_=Depends(verify_user),user_id=Depends(checkUser)):

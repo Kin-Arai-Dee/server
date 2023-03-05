@@ -1,10 +1,12 @@
 from typing import List
+from models.food import Ingredient, Tag
 from schemas.food import FoodResponse
 from pydantic import BaseModel, Field
 from bson import ObjectId
 
 class PredictionSubmitRequest(BaseModel):
-  impress: bool
+	impress: bool
+	predict: bool
 
 
 class ListFoodResponse(BaseModel):

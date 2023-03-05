@@ -7,3 +7,5 @@ class FoodHistory(MongoBaseModel):
 	foodId: PyObjectId = Field(default_factory=PyObjectId)
 	userId: PyObjectId = Field(default_factory=PyObjectId)
 	isSuccess: bool = Field(...)
+	clusterId: int = Field(...)
+	isRandom: bool = Field(default=True)

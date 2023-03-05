@@ -1,5 +1,6 @@
+from datetime import datetime
 from typing import List
-from config.db import userDb
+from config.db import userDb, ingredientDb, userStatDb
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer 
 from fastapi.encoders import jsonable_encoder
@@ -18,6 +19,24 @@ USER_NOT_FOUND_ERROR = HTTPException(
 		detail="User not found",
 )
 
+def create_user_stat(user_id: str):
+	state_score = []
+	for i in range(48):
+		state_score.append({
+			'userId': ObjectId(user_id),
+			'clusterId': i,
+			'like': 0,
+			'disLike': 0,
+		})
+	userStatDb.insert_many(state_score)
+
+def find_ban_ingredients_name(ingredient_ids: List[str]):
+	ingredient = ingredientDb.find({
+		'_id': { '$in': [ObjectId(x) for x in ingredient_ids]}
+	})
+
+	return list(ingredient)
+
 def get_user(user_id: str):
 	result = userDb.find_one({ '_id': ObjectId(user_id) })
 	if result:
@@ -26,7 +45,7 @@ def get_user(user_id: str):
 def get_user_from_user_name(username: str):
 	result = userDb.find_one({'username': username })
 	if result:
-			return UserInDB(**result)
+		return UserInDB(**result)
 
 def authenticate_user(username: str, password: str):
 	user = get_user_from_user_name(username)
@@ -34,7 +53,11 @@ def authenticate_user(username: str, password: str):
 			return False
 	if not verify_password(password, user.hashed_password):
 			return False
-	return user
+
+	user = user.dict()
+	banFood = find_ban_ingredients_name(user.pop('banFood'))
+	
+	return UserResponse(**user,banFood=banFood)
 
 async def verify_user(request: Request,token: str = Depends(oauth2_scheme)):
 	token_data = await verify_access_token(token)
@@ -47,7 +70,10 @@ async def get_current_user(request: Request,token: str = Depends(oauth2_scheme))
 	if user is None:
 			raise USER_NOT_FOUND_ERROR
 	request.state.user = user
-	return user
+	user = user.dict()
+
+	banFood = find_ban_ingredients_name(user.pop('banFood'))
+	return UserResponse(**user,banFood=banFood)
 
 async def checkUser(request: Request,user_id:str):
 	if str(request.state.user.id) != user_id:
@@ -55,11 +81,16 @@ async def checkUser(request: Request,user_id:str):
 	return user_id
 
 async def get_token_response(user):
+	if 'userId' in user:
+		sub = user["userId"]
+	else:
+		sub = user["id"]
+
 	access_token, expire_token = create_access_token(
-		data={"sub": str(user["id"]), "name": user["username"]}
+		data={"sub": str(sub), "name": user["username"]}
 	)
 	refresh_token, expire_refresh_token = create_refresh_token(
-		data={"sub": str(user["id"]), "name": user["username"]}
+		data={"sub": str(sub), "name": user["username"]}
 	)
 
 	return TokenResponse(
@@ -81,6 +112,7 @@ async def register_user(user: RegisterRequest):
 
 	tokenResponse = await get_token_response(userData.dict())
 
+	create_user_stat(userData.id)
 	return AuthResponse(user=userData, **jsonable_encoder(tokenResponse))
 
 async def accessToken_for_login(user: UserInDB):
@@ -88,15 +120,18 @@ async def accessToken_for_login(user: UserInDB):
 
 	return AuthResponse(user=user, **jsonable_encoder(tokenResponse))
 
-def ban_food_by_ingredient(user_id:str,  ingredients: List[str]):
-	food_id_list = get_food_id_by_ingredient(ingredients)
+def ban_food_by_ingredient(user_id:str,  ingredient_ids: List[str]):
+	food_id_list = get_food_id_by_ingredient(ingredient_ids)
 	ban_food_by_id(user_id,food_id_list)
 
 async def update_user_description(user_id: str,updateData: UpdateUserRequest) -> UpdateUserDescription:
 	updateDescritpion = UpdateUserDescription(**updateData.dict())
 
 	userDb.update_one({'_id': ObjectId(user_id)},{
-		'$set': updateDescritpion.dict()
+		'$set': {
+			**updateDescritpion.dict(),
+			'updateAt': datetime.now()
+		}
 	})
 
 	if updateDescritpion.banFood:
@@ -107,10 +142,13 @@ async def update_user_description(user_id: str,updateData: UpdateUserRequest) ->
 async def update_ready_user(user_id: str) -> UserResponse:
 	userDb.update_one({'_id' : ObjectId(user_id)}, {
 		'$set': {
-			'withDescription': True
+			'withDescription': True,
+			'updateAt': datetime.now()
 		}
 	})
 
 	user = userDb.find_one({'_id' : ObjectId(user_id)})
 
-	return UserResponse(**user)
+	banFood = find_ban_ingredients_name(user.pop('banFood'))
+	return UserResponse(**user,banFood=banFood)
+
