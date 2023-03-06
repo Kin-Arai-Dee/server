@@ -12,7 +12,7 @@ def find_last_week_accept_cluster(user_id: str):
   last_week = datetime.utcnow() - timedelta(days=7)
   cluster_ids = foodHistoryDb.find({ 'userId': ObjectId(user_id),'isSuccess': True, 'createAt': {"$gte": last_week}}).distinct('clusterId')
 
-  return list(cluster_ids)
+  return cluster_ids
 
 def find_month_cluster(user_id: str, exclude_clusters: List[int]= []):
   last_month = datetime.utcnow() - timedelta(days=30)

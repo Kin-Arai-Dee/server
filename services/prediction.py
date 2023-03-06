@@ -26,7 +26,7 @@ def argsort(arr, reverse=False):
     return sorted(range(len(arr)), key=lambda i: arr[i],reverse=reverse)
 
 def get_stat_score(user_id: str, exclude_clusters: List[int] = []):
-  return userStatDb.find({ 'userId': ObjectId(user_id), 'clusterId': exclude_clusters})
+  return list(userStatDb.find({ 'userId': ObjectId(user_id), 'clusterId': exclude_clusters}))
 
 def calculate_score(user_id: str,force: bool = False):
   exclude_clusters = find_last_week_accept_cluster(user_id)
