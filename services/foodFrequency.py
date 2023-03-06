@@ -87,7 +87,7 @@ def add_frequency(id: ObjectId,success:bool=True):
 #     "detail": f"set food never show to be {not food_freq.isNeverShow}"
 #   }
 
-def ban_food_by_id(user_id:str,food_id_list: List[str]):
+def ban_food_by_id(user_id:str,food_id_list: List[str], unban_id_list: List[str]):
   update_food_ban = []
 
   for food_id in food_id_list:
@@ -102,7 +102,20 @@ def ban_food_by_id(user_id:str,food_id_list: List[str]):
       '$setOnInsert': FoodFrequencyDefault().dict()
       }, upsert=True))
 
-  foodFreqDb.bulk_write(update_food_ban)
+  for food_id in unban_id_list:
+    update_food_ban.append(UpdateOne({
+      'foodId': food_id,
+      'userId': user_id,
+    }, {
+      '$set': {
+        'updateAt': datetime.now(),
+        'isBan': False,
+      },
+      '$setOnInsert': FoodFrequencyDefault().dict()
+      }, upsert=True))
+
+  if update_food_ban:
+    foodFreqDb.bulk_write(update_food_ban)
 
 def find_top_ten_food_id():
   top_freq_food = foodFreqDb.aggregate([

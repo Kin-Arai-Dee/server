@@ -120,12 +120,15 @@ async def accessToken_for_login(user: UserInDB):
 
 	return AuthResponse(user=user, **jsonable_encoder(tokenResponse))
 
-def ban_food_by_ingredient(user_id:str,  ingredient_ids: List[str]):
+def ban_food_by_ingredient(user_id:str,  ingredient_ids: List[str],unban_food):
 	food_id_list = get_food_id_by_ingredient(ingredient_ids)
-	ban_food_by_id(user_id,food_id_list)
+	unban_food_id_list = get_food_id_by_ingredient(unban_food)
+	ban_food_by_id(user_id,food_id_list,unban_food_id_list)
 
 async def update_user_description(user_id: str,updateData: UpdateUserRequest) -> UpdateUserDescription:
 	updateDescritpion = UpdateUserDescription(**updateData.dict())
+
+	user = userDb.find_one({'_id': ObjectId(user_id)})
 
 	userDb.update_one({'_id': ObjectId(user_id)},{
 		'$set': {
@@ -135,7 +138,12 @@ async def update_user_description(user_id: str,updateData: UpdateUserRequest) ->
 	})
 
 	if updateDescritpion.banFood:
-		ban_food_by_ingredient(user_id,updateDescritpion.banFood)
+		if user:
+			unban_food = []
+			for ban in user['banFood']:
+				if ban not in updateDescritpion.banFood:
+					unban_food.append(ban)
+		ban_food_by_ingredient(user_id,updateDescritpion.banFood, unban_food)
 
 	return updateDescritpion
 

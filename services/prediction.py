@@ -60,7 +60,7 @@ async def prediction_food(user_id: str,force: bool):
   food = foodDb.aggregate([
     {'$match': { '_id': { '$nin': ban_id_list}}},
     { "$addFields" : { "__order" : { "$indexOfArray" : [ cluster_scores, "$clusterId" ] } } },
-    { "$sort" : { "__order" : 1 } },
+    { "$sort" : { "__order" : 1, 'frequency': -1, 'allTimeScore': -1 } },
     { '$limit': 30 },
     {'$sample': {'size': 5}}
   ])
@@ -69,6 +69,13 @@ async def prediction_food(user_id: str,force: bool):
 
 async def submit_prediction_result(userId: str,foodId: str, impress: bool,predict:bool = True):
   food_freq = create_or_find_food_frequency_db(userId,foodId)
+  if impress:
+    foodDb.update_one({'_id': ObjectId(foodId)}, {
+      '$inc': {
+        'frequency': 1
+      }
+    })
+
   add_frequency(food_freq.id,success=impress)
   add_log_food_history(userId,foodId,is_success=impress,predict=predict)
 
