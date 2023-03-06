@@ -27,7 +27,7 @@ def find_month_cluster(user_id: str, exclude_clusters: List[int]= []):
 
   cluster_scores = foodHistoryDb.aggregate(pipeline)
 
-  return cluster_scores
+  return list(cluster_scores)
 
 def add_log_food_history(user_id: str,food_id: str, is_success: bool,predict=True):
   food = foodDb.find_one({'_id': ObjectId(food_id)})

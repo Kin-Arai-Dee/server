@@ -1,4 +1,3 @@
-from traceback import print_tb
 from typing import List
 from fastapi import HTTPException, status
 
@@ -29,14 +28,14 @@ def argsort(arr, reverse=False):
 def get_stat_score(user_id: str, exclude_clusters: List[int] = []):
   return userStatDb.find({ 'userId': ObjectId(user_id), 'clusterId': exclude_clusters})
 
-def calculate_score(user_id: str):
+def calculate_score(user_id: str,force: bool = False):
   exclude_clusters = find_last_week_accept_cluster(user_id)
 
   card_score = get_stat_score(user_id,exclude_clusters)
   month_predict_score = find_month_cluster(user_id,exclude_clusters)
 
-  if not month_predict_score:
-    return NOT_FOUND_HISTORY
+  if not force and not month_predict_score and not exclude_clusters:
+    raise NOT_FOUND_HISTORY
 
   cluster_score = [0] * 48
 
@@ -54,9 +53,9 @@ def calculate_score(user_id: str):
   # [3, 1, 5 ...., 2]
   return argsort(cluster_score,reverse=True)
   
-async def prediction_food(user_id: str):
+async def prediction_food(user_id: str,force: bool):
   ban_id_list = get_all_ban_food_id(user_id)
-  cluster_scores = calculate_score(user_id)
+  cluster_scores = calculate_score(user_id,force)
 
   food = foodDb.aggregate([
     {'$match': { '_id': { '$nin': ban_id_list}}},

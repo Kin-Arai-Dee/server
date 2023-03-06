@@ -6,8 +6,8 @@ from services.prediction import prediction_food, submit_prediction_result
 prediction = APIRouter()
 
 @prediction.get('/food', response_model=ListFoodResponse)
-async def perdiction_food_from_model(request: Request):
-  return await prediction_food(request.state.user.id)
+async def perdiction_food_from_model(request: Request, force: bool):
+  return await prediction_food(request.state.user.id,force)
 
 @prediction.post('/submit/{food_id}')
 async def submit_prediction_food_result(request: Request,food_id: str, result: PredictionSubmitRequest):
