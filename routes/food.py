@@ -1,7 +1,8 @@
 from code import interact
 from fastapi import APIRouter, Request
-from schemas.food import FoodNameResponse,TagListResponse, IngredientListResponse
+from schemas.food import FoodNameResponse,TagListResponse, IngredientListResponse, TopIngredientListResponse
 from schemas.prediction import ListFoodResponse
+from schemas.utils import ResultResponse2
 
 from services.food import get_all_categories, get_all_food_name, get_all_ingredients, get_all_methods, get_all_tags, get_ramdom_unvoted_food, ingredient_user_eat, top_ten_food, user_top_food_list
 
@@ -44,14 +45,14 @@ async def get_top_food():
 # async def never_show_food(request: Request, food_id: str):
 #   return set_not_show(request.state.user.id, food_id)
 
-@food.patch('/interact/{food_id}')
+@food.patch('/interact/{food_id}',response_model=ResultResponse2 )
 async def update_food_interact(request: Request,food_id: str,interact: int,clusterId: int):
   return set_food_interact(request.state.user.id,food_id,interact,clusterId)
 
-@food.get('/top-ingredients')
+@food.get('/top-ingredients', response_model=TopIngredientListResponse)
 async def find_user_top_ingredient(request: Request):
   return ingredient_user_eat(request.state.user.id)
 
-@food.get('/top-user-food')
+@food.get('/top-user-food', response_model=ListFoodResponse)
 async def top_food_user_eat(request: Request):
   return user_top_food_list(request.state.user.id)

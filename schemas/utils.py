@@ -1,6 +1,5 @@
-def serializeDict(a) -> dict:
-    return {**{i:str(a[i]) for i in a if i=='_id'},**{i:a[i] for i in a if i!='_id'}}
+class ResultResponse:
+    result: str
 
-def serializeList(entity) -> list:
-    return [serializeDict(a) for a in entity]
-    
+class ResultResponse2:
+    detail: str
