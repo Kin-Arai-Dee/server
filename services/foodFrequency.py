@@ -92,8 +92,8 @@ def ban_food_by_id(user_id:str,food_id_list: List[str], unban_id_list: List[str]
 
   for food_id in food_id_list:
     update_food_ban.append(UpdateOne({
-      'foodId': food_id,
-      'userId': user_id,
+      'foodId': ObjectId(food_id),
+      'userId': ObjectId(user_id),
     }, {
       '$set': {
         'updateAt': datetime.now(),
@@ -104,8 +104,8 @@ def ban_food_by_id(user_id:str,food_id_list: List[str], unban_id_list: List[str]
 
   for food_id in unban_id_list:
     update_food_ban.append(UpdateOne({
-      'foodId': food_id,
-      'userId': user_id,
+      'foodId': ObjectId(food_id),
+      'userId': ObjectId(user_id),
     }, {
       '$set': {
         'updateAt': datetime.now(),
