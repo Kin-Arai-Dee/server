@@ -3,8 +3,7 @@ from fastapi import APIRouter, Request
 from schemas.food import FoodNameResponse,TagListResponse, IngredientListResponse, TopIngredientListResponse
 from schemas.prediction import ListFoodResponse
 from schemas.utils import ResultResponse2
-
-from services.food import get_all_categories, get_all_food_name, get_all_ingredients, get_all_methods, get_all_tags, get_ramdom_unvoted_food, ingredient_user_eat, top_ten_food, user_top_food_list
+from services.food import get_all_categories, get_all_food_name, get_all_ingredients, get_all_methods, get_all_tags, get_ramdom_unvoted_food, get_top_food_by_tag_id, ingredient_user_eat, top_ten_food, user_top_food_list
 
 from services.foodFrequency import set_food_interact
 food = APIRouter()
@@ -29,6 +28,10 @@ async def get_all_categories_list():
 async def get_all_food_name_list():
   return get_all_food_name()
 
+@food.get('/top-food/{tag_id}', response_model=FoodNameResponse)
+async def get_all_food_name_list(tag_id: str):
+  return get_top_food_by_tag_id(tag_id)
+
 @food.get('/unvoted-food-list', response_model=FoodNameResponse)
 async def get_ramdom_unvoted_food_list(request: Request,size: int = 30):
   return get_ramdom_unvoted_food(request.state.user.id,size)
@@ -45,7 +48,7 @@ async def get_top_food():
 # async def never_show_food(request: Request, food_id: str):
 #   return set_not_show(request.state.user.id, food_id)
 
-@food.patch('/interact/{food_id}',response_model=ResultResponse2 )
+@food.patch('/interact/{food_id}',response_model=ResultResponse2)
 async def update_food_interact(request: Request,food_id: str,interact: int,clusterId: int):
   return set_food_interact(request.state.user.id,food_id,interact,clusterId)
 

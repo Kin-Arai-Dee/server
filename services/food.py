@@ -67,6 +67,13 @@ def get_all_food_name():
   all_food = list(foodDb.find())
   return FoodNameResponse(data=all_food)
 
+def get_top_food_by_tag_id(tag_id: str):
+  all_food = list(foodDb.find({
+    'tagIds': ObjectId(tag_id)
+  }).sort('frequency', DESCENDING).limit(10))
+
+  return FoodNameResponse(data=all_food)
+
 def get_ramdom_unvoted_food(user_id: str,size: int):
   food_id_list = get_all_voted_food_id(user_id)
 

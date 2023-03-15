@@ -136,7 +136,7 @@ def find_top_ten_food_id():
   return [food["_id"] for food in top_freq_food]
 
 def find_top_user_food_id(user_id: str):
-  top_freq_food_id = foodFreqDb.find({'userId': ObjectId(user_id)}).sort('successCount',DESCENDING).distinct('foodId')
+  top_freq_food_id = foodFreqDb.find({'userId': ObjectId(user_id), 'successCount': {'$gt': 0}}).sort('successCount',DESCENDING).distinct('foodId')
 
   return top_freq_food_id
 
@@ -199,7 +199,7 @@ def find_all_most_user_eaten(user_id: str):
   food_freq_list_id = foodFreqDb.find({
     'userId': ObjectId(user_id),
     }
-  ).sort('successCount',DESCENDING)
+  ).sort('successCount',DESCENDING).limit(10)
 
   return [d['foodId'] for d in food_freq_list_id]
 
